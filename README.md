@@ -43,12 +43,14 @@ Streaming job:
 ## Docker Troubleshooting
 ### mkdir error when running `make consume-events`
 This error happens because of permission issue, open the spark master container with docker desktop in terminal and run `chmod -R 777 /scripts/logs`
-    ![chmod](img/chmod-logs.png)
-    
-    to prevent mkdir error for the next steps.
+
+![chmod](img/chmod-logs.png)
+
+to prevent mkdir error for the next steps.
 
 If the issue persists, then it might be because the "logs" folder is not empty, delete all files in the "logs" folder, and then run `make consume-events` again.
-    ![delete](img/delete-checkpoints.png)
+
+![delete](img/delete-checkpoints.png)
 
 ### `dataeng-network already exist` when `make docker-build`
 The solution is quite simple, run `docker network rm network-name`:
