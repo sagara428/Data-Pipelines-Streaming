@@ -44,22 +44,22 @@ producer = KafkaProducer(bootstrap_servers=f'{kafka_host}:9092')
 faker = Faker()
 
 
-class DataGenerator:
-    """
+class DataGenerator(object):
+    '''
     A class for generating synthetic data.
-    """
+    '''
 
     @staticmethod
     def get_data():
-        """
+        '''
         Generate and return a list of fake data.
 
         Returns:
             list: A list containing fake data elements.
-        """
+        '''
         now = datetime.now()
         return [
-            uuid.uuid4().str,
+            uuid.uuid4().__str__(),
             faker.random_int(min=1, max=100),
             faker.random_element(elements=('Chair', 'Table', 'Desk', 'Sofa', 'Bed')),
             faker.safe_color_name(),
