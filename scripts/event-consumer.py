@@ -21,14 +21,16 @@ spark_host = f'spark://{spark_hostname}:{spark_port}'
 spark = SparkSession.builder.appName('DibimbingStreaming').master(spark_host).getOrCreate()
 spark.sparkContext.setLogLevel('WARN')
 
-# Define the Kafka source for streaming
+# Define the Kafka source for streaming with failOnDataLoss set to false
 stream_df = (
     spark.readStream.format('kafka')
     .option('kafka.bootstrap.servers', f'{kafka_host}:9092')
     .option('subscribe', kafka_topic)
     .option('startingOffsets', 'latest')
+    .option('failOnDataLoss', 'false')
     .load()
 )
+
 
 # Define the schema for the incoming Kafka messages
 schema = StructType(
@@ -50,22 +52,32 @@ parsed_df = (
     .withColumn('ts', from_unixtime('ts').cast('timestamp'))
 )
 
-# Define a function to process each batch of data
-def process_batch(df, batch_id):
-    # Create a windowed DataFrame for daily total purchase within the batch
-    windowed_df = (
-        df.withWatermark('ts', '15 minutes')
-        .groupBy(window('ts', '1 day').alias('timestamp'))
-        .agg(sum('price').alias('running_total'))
-        .select('timestamp.start', 'running_total')
-    )
-    windowed_df.show(truncate=False)
+# Create a windowed DataFrame for daily total purchase within the batch
+windowed_df = (
+    parsed_df.withWatermark('ts', '15 minutes')
+    .groupBy(window('ts', '1 day').alias('timestamp'))
+    .agg(sum('price').alias('daily_total'))
+)
 
-# Write the results to console
+
+# Define a function to process each batch of data
+def process_batch(batch_df, batch_id):
+    # Calculate the running total for this batch
+    running_total = batch_df.selectExpr('timestamp', 'sum(daily_total) as running_total').collect()
+    
+    # Collect the data into a list
+    data_list = running_total
+    
+    return data_list
+
+
+
+# Write the results to a custom processing function using foreachBatch
 query = (
-    parsed_df.writeStream
+    windowed_df.writeStream
     .foreachBatch(process_batch)
-    .trigger(processingTime='1 minute')
+    .format('console')
+    .trigger(processingTime='2 minutes')
     .outputMode('update')
     .option('checkpointLocation', '/scripts/logs')
     .start()
