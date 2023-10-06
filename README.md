@@ -26,7 +26,8 @@ Streaming job:
     `make spark`
 
     ![Make Spark](img/make-spark.png)
-     note that command will also create "scripts/logs" folder for checkpointing.
+
+    note that command will also create "scripts/logs" folder for checkpointing.
 
     `make kafka`
     ![Make kafka](img/make-kafka.png)
