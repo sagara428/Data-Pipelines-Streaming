@@ -56,7 +56,7 @@ produce-events:
 	@echo '__________________________________________________________'
 	@docker exec ${SPARK_WORKER_CONTAINER_NAME}-1 \
 		python \
-		/scripts/event-producer.py
+		/scripts/event_producer.py
 
 consume-events:
 	@echo '__________________________________________________________'
@@ -64,4 +64,4 @@ consume-events:
 	@echo '__________________________________________________________'
 	@docker exec ${SPARK_WORKER_CONTAINER_NAME}-1 \
 		spark-submit \
-		/scripts/event-consumer.py
+		/scripts/event_consumer.py
