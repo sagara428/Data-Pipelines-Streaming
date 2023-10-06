@@ -56,12 +56,12 @@ parsed_df = (
 windowed_df = (
     parsed_df.withWatermark('ts', '15 minutes')
     .groupBy(window('ts', '1 day').alias('timestamp'))
-    .agg(sum('price').alias('daily_total'))
+    .agg(sum('price').alias('running_total'))
 )
 
 def process_batch(batch_df, batch_id):
     # Calculate the running total for this batch
-    running_total = batch_df.selectExpr('timestamp', 'sum(daily_total) as running_total')
+    running_total = batch_df.selectExpr('timestamp', 'running_total')
     
     # Collect the data into a list
     data_list = running_total.collect()
