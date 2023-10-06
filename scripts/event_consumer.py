@@ -87,7 +87,7 @@ windowed_df = (
 )
 
 def process_batch(batch_df):
-    """
+    '''
     Process a batch of data in the specified DataFrame.
 
     This function selects the 'timestamp' and 'running_total' columns from the
@@ -98,7 +98,7 @@ def process_batch(batch_df):
 
     Returns:
     - list: A list of running total data for the batch.
-    """
+    '''
     # Select timestamp and running_total column
     running_total = batch_df.selectExpr('timestamp', 'running_total')
 
