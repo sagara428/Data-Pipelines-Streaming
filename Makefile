@@ -4,7 +4,8 @@ help:
 	@echo "## docker-build			- Build Docker Images including its inter-container network."
 	@echo "## spark			- Run a Spark cluster, rebuild the postgres container, then create the destination tables "
 	@echo "## kafka			- Spinup kafka cluster (Kafka+Zookeeper)."
-	@echo "## clean			- Cleanup all running containers related to the challenge."
+	@echo "## produce-events			- produce fake purchasing events."
+	@echo "## consume-events			- consume the events and show daily total for each batch."
 
 docker-build:
 	@echo '__________________________________________________________'
