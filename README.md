@@ -26,19 +26,15 @@ Streaming job:
     `make spark`
 
     ![Make Spark](img/make-spark.png)
-    
+     note that command will also create "scripts/logs" folder for checkpointing.
+
     `make kafka`
     ![Make kafka](img/make-kafka.png)
- 
-5. Open the spark master container with docker desktop in terminal and run `chmod -R 777 /scripts/logs`
-    ![chmod](img/chmod-logs.png)
-    
-    to prevent mkdir error for the next steps.
 
-6. Run `make produce-events` to create fake events about furniture store data.
+5. Run `make produce-events` to create fake events about furniture store data.
     ![make produce](img/make-produce-events.png)
 
-7. Open the folder in a new terminal and run `make consume-events` to consume the created fake events.
+6. Open the folder in a new terminal and run `make consume-events` to consume the created fake events.
 
     ![make produce](img/make-consume-events.png)
  
@@ -46,7 +42,12 @@ Streaming job:
 
 ## Docker Troubleshooting
 ### mkdir error when running `make consume-events`
-This error happens because of permission issue, make sure that you have done the step 5 on the previous section. If the issue persists, then it might be because the "logs" folder is not empty, delete all files in the "logs" folder, and then run `make consume-events` again.
+This error happens because of permission issue, open the spark master container with docker desktop in terminal and run `chmod -R 777 /scripts/logs`
+    ![chmod](img/chmod-logs.png)
+    
+    to prevent mkdir error for the next steps.
+
+If the issue persists, then it might be because the "logs" folder is not empty, delete all files in the "logs" folder, and then run `make consume-events` again.
     ![delete](img/delete-checkpoints.png)
 
 ### `dataeng-network already exist` when `make docker-build`
