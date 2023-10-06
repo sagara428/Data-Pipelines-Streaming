@@ -59,18 +59,14 @@ windowed_df = (
     .agg(sum('price').alias('daily_total'))
 )
 
-
-# Define a function to process each batch of data
 def process_batch(batch_df, batch_id):
     # Calculate the running total for this batch
-    running_total = batch_df.selectExpr('timestamp', 'sum(daily_total) as running_total').collect()
+    running_total = batch_df.selectExpr('timestamp', 'sum(daily_total) as running_total')
     
     # Collect the data into a list
-    data_list = running_total
+    data_list = running_total.collect()
     
     return data_list
-
-
 
 # Write the results to a custom processing function using foreachBatch
 query = (
