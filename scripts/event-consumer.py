@@ -50,26 +50,25 @@ parsed_df = (
     .withColumn('ts', from_unixtime('ts').cast('timestamp'))
 )
 
-# Create a windowed DataFrame for daily total purchase
-windowed_df = (
-    parsed_df.withWatermark('ts', '1 minutes')
-    .groupBy(window('ts', '1 day').alias('timestamp'))
-    .agg(sum('price').alias('running_total'))
-)
+# Define a function to process each batch of data
+def process_batch(df, batch_id):
+    # Create a windowed DataFrame for daily total purchase within the batch
+    windowed_df = (
+        df.withWatermark('ts', '15 minutes')
+        .groupBy(window('ts', '1 day').alias('timestamp'))
+        .agg(sum('price').alias('running_total'))
+        .select('timestamp.start', 'running_total')
+    )
+    windowed_df.show(truncate=False)
 
-# Define a function to write the results to the console using foreachBatch
-def foreach_batch_function(df, epoch_id):
-    df.select('timestamp.start', 'running_total').show(truncate=False)
-
-# Write the results to the console using foreachBatch
-(
-    windowed_df
-    .writeStream
-    .foreachBatch(foreach_batch_function)
-    .trigger(processingTime='2 minutes')
-    .outputMode('append') 
-    .format('console')
+# Write the results to console
+query = (
+    parsed_df.writeStream
+    .foreachBatch(process_batch)
+    .trigger(processingTime='1 minute')
+    .outputMode('update')
     .option('checkpointLocation', '/scripts/logs')
     .start()
-    .awaitTermination()
 )
+
+query.awaitTermination()
