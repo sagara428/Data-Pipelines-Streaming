@@ -14,7 +14,8 @@ Streaming job:
 
 ## How to run
 1. Clone this repository
-2. Open terminal / CMD and change the directory to the cloned repository folder
+2. Open terminal / CMD and change the directory to the cloned repository folder and run `make help` to check what we can run.
+    ![Make help](img/make-help.png)
 3. Run:
     ```console
     make docker-build
