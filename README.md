@@ -1,37 +1,14 @@
 # Batch Processing with PySpark
 
-This project demonstrates batch processing with PySpark using docker which contains the following containers.
+This project demonstrates a Data Pipelines for Streaming System with:
+Event Producer:
+- Produce purchasing events with faker
 
-## Table of Contents
-- [Dataset](#dataset)
-- [How to run](#how-to-run)
-- [Docker troubleshooting](#docker-troubleshooting)
-- [Spark Scripts](#sparkscripts)
-- [Analysis result](#analysis-result)
-
-
-
-## Dataset
-The dataset used in this project is `online-retail-dataset` which is from UCI Machine Learning Repository.
-The dataset is a real online retail transaction dataset about a UK-based non-store online retail company which mainly sells unique all-occasion gift-ware.
-
-### Dataset Information
-
-- **InvoiceNo**: Invoice number. Nominal. A 6-digit integral number uniquely assigned to each transaction. If this code starts with the letter 'c', it indicates a cancellation.
-
-- **StockCode**: Product (item) code. Nominal. A 5-digit integral number uniquely assigned to each distinct product.
-
-- **Description**: Product (item) name. Nominal.
-
-- **Quantity**: The quantities of each product (item) per transaction. Numeric.
-
-- **InvoiceDate**: Invoice date and time. Numeric. The day and time when a transaction was generated.
-
-- **UnitPrice**: Unit price. Numeric. Product price per unit in sterling.
-
-- **CustomerID**: Customer number. Nominal. A 5-digit integral number uniquely assigned to each customer.
-
-- **Country**: Country name. Nominal. The name of the country where a customer resides.
+Streaming job:
+- Listen to kafka topic
+- Aggregate for daily total purchase
+- Write it to console with these columns: Timestamp, Running total
+- Using foreachBatch
 
 
 ## How to run
@@ -99,56 +76,6 @@ docker object prune
 ```
 change the `object` to `image`, `system`, `container`, or `volumes` to prune the unused docker objects and free up some diskspaces. You can check the documentation [here](https://docs.docker.com/config/pruning/).
 
-## Spark Scripts
-The structure of the Spark Scripts folder is like this.
-- spark-scripts
-  - main.py
-  - lib
-    - extract.py
-    - transform.py
-    - load.py
-    - __init__.py
-  - jar
-    - postgresql-42.6.0.jar
 
-- The jar file is to help spark connect to postgreSQL.
-- Here is the description on `main.py`: 
-    ![main](/img/main.png)
-- Here is the description on `extract.py`:
-    ![extract](/img/extract.png)
-- Here is the description on `transform.py`:
-    ![transform](/img/transform.png)
-- Here is the description on `load.py`:
-    ![load](/img/load.png)
-
-## ETL Result
-### Adding `is_cancelled` Column
-Here, the retail dataset is enriched by adding `is_cancelled` column to make it easier to further analyze the cancelled transaction for future projects whether for machine learning, like customer segmentation or maybe sentiment analysis with the help of analyzing `is_cancelled` column and `description` column. Here in this project, I used this column to find completion rate.
-
-### Data Cleaning
-For the data cleaning, after checking the datasets, there are some interesting things:
-- Quantity has negative values.
-- Only cancelled transaction has negative value on quantity. This might suggest that negative value quantities means returned products due to cancelled transactions.
-- Transaction with negative quantity has description which is not the name of the product, but something that might describe why the item is returned.
-- There are transactions of product with 0 unit price. This might be a bonus from a certain transaction or something.
-- There is a unit price with negative value.
-- There are customers without customerId (Null).
-- There are Null descriptions and all transaction with Null description has Null customerId (Ghost customers).
-- There is no Null in other columns.
-
-Based on those informations, the cleaning is done by removing all rows Null customerId first because those rows cannot be used for more exploration like by joining with another datasets and cannot be used for finding rate related metrics which measure the performance of customers. Transactions with 0 unit price is also removed because it does not add any valuable insight in customers or the company's performance analysis. After removing those two, surprisingly transactions with unit price of negative value is already removed. Here is the result of data cleaning:
-![Cleaned Retail](/img/postgres-retail-cleaned.png)
-
-### Completion Rate
-
-Here, completion rate is a metric that measure the performance of the online retail company to make succesful transaction in each country. The value is calculated by finding the ratio of succesful transaction to total transaction (cancelled transactions included).
-![completion rate](/img/postgres-completion-rate.png)
-
-Surprisingly, there are about 9 countries in UK in which the company does not experience cancelled transactions. It might be because the products offered by the online retail company, which are unique all-occasion gift-wares, match the preference of people from those countries.
-
-### Monthly Churn Rate
-Here, the monthly churn rate is calculated to measure the performance of the company's customers in each month. The churn rate is a rate of customers who stop subscribing or doing transaction on the online retail company which is calculated in a period of time (in this case, monthly).  In calculating churn rate, the data is filtered from cancelled transactions to avoid misinterpretation of customers with cancelled transactions as a churned customers or customers who stop subscribing or doing transactions. The difference is actually that cancellation can be reversed (the customers might want to do transaction without cancelling this time), but churn is forever.
-![Churn rate](/img/postgres-churn-rate.png)
-Obviously the lower the churn rate, the better. Here, the churn rate of each months hit the lowest value at the first two months, and then increasing and fluctuating around 30 and 40 for a couple of months later. 
 
 
