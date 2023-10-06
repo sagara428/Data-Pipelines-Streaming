@@ -60,10 +60,10 @@ windowed_df = (
 )
 
 def process_batch(batch_df, batch_id):
-    # Calculate the running total for this batch
+    # Select timestamp and running_total column
     running_total = batch_df.selectExpr('timestamp', 'running_total')
     
-    # Collect the data into a list
+    # Collect the running total data of each batch into a list
     data_list = running_total.collect()
     
     return data_list
